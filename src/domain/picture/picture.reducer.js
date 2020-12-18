@@ -14,13 +14,29 @@ export default function reducer(state, action) {
                 pictures: action.payload
             }
         case types.PICTURE_LIKED:
-            const { pictures, user } = state;
-            const idx = pictures.findIndex(picture => picture._id === action.payload._id);
-            pictures[idx] = { ...pictures[idx], likedBy: [...pictures[idx].likedBy, user._id] };
+            const { pictures } = state;
+            const idx = pictures.findIndex(picture => picture.picsum_id === action.payload.picsum_id);
+            pictures[idx] = { ...pictures[idx], ...action.payload };
             return {
                 ...state,
                 pending: false,
                 pictures: [...pictures]
+            }
+        case types.PICTURE_DISLIKED:
+            const pictureLiked = state.pictures;
+            const userLiked = state.user;
+            const idx2 = pictureLiked.findIndex(picture => picture.picsum_id === action.payload.picsum_id);
+
+            pictureLiked[idx2].likedBy.forEach((userId, index)=> {
+                if(userId === userLiked.id) {
+                    pictureLiked[idx2].likedBy.splice(index,1)
+                }
+            });
+            pictureLiked[idx2] = { ...pictureLiked[idx2], ...action.payload };
+            return {
+                ...state,
+                pending: false,
+                pictures: [...pictureLiked]
             }
         case types.PICTURE_FAILED:
             return {
